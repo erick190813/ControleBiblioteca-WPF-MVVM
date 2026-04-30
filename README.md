@@ -137,7 +137,7 @@ O simulador é um "robô" sem interface gráfica (*headless*), criado para injet
   1. **Prevenção de Race Conditions (Condições de Corrida):** Simula múltiplos totens de biblioteca funcionando ao mesmo tempo. Garante que se duas requisições tentarem alugar a última cópia de um livro no exato mesmo milissegundo, o Entity Framework gerenciará o travamento (*Lock*) do banco de dados, entregando a cópia para a primeira requisição e bloqueando a segunda com um erro de estoque.
   2. **Resiliência da Rede:** Prova que a classe `HttpClient` foi bem implementada e está reaproveitando conexões corretamente (sem causar *Socket Exhaustion*), mantendo a API de pé e respondendo rapidamente sob volume constante de dados.
 
-### 5. Teste de Regras de Tempo e Lógica Financeira (Cálculo de Multas)
+### 4. Teste de Regras de Tempo e Lógica Financeira (Cálculo de Multas)
 Como o sistema define automaticamente um prazo de 7 dias para a devolução, todos os novos empréstimos criados estarão no prazo e retornarão multa de `R$ 0,00`. Para validar o algoritmo matemático de cálculo de atraso (R$ 2,00 por dia), é necessário realizar uma "viagem no tempo" manipulando o banco de dados.
 
 **Passo a passo para testar (Time Travel Simulation):**
