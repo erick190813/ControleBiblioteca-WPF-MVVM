@@ -102,6 +102,6 @@ Projeto acadêmico desenvolvido para a unidade curricular de Desenvolvimento de 
 
 * **Desenvolvedor:** Erick Silva Fernandes de Araujo
 * **Instituição:** SENAI Nova Lima
-* **Curso:** Técnico em Desenvolvimento de Sistemas Noite[cite: 1]
-* **Instrutor:** Frederico Aguiar[cite: 1]
-* **Data / Prazo:** 20 de Abril de 2026[cite: 1]
+* **Curso:** Técnico em Desenvolvimento de Sistemas Noite
+* **Instrutor:** Frederico Aguiar
+* **Data / Prazo:** 30 de Abril de 2026
