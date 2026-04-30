@@ -97,6 +97,58 @@ Visando a evolução contínua da arquitetura para cenários de altíssima escal
 
 ---
 
+## 🧪 Guia de Testes, Validação e Decisões Arquiteturais
+
+A qualidade desta solução é garantida através de testes isolados por responsabilidade. Cada camada do sistema (API, Interface e Worker) foi testada com objetivos arquiteturais específicos, provando a resiliência das regras de negócio e a estabilidade da integração.
+
+### 1. Validação da API REST (Verbos HTTP via Swagger)
+A API é o "coração" do sistema e a única porta de entrada para o banco de dados. Os testes manuais via Swagger servem para isolar o Back-end do Front-end, garantindo que as regras de proteção funcionem independente de quem faz a requisição.
+
+* **GET (Listagem e Busca):** 
+  * **O que testar:** Acessar `/api/Emprestimos` (todos) e `/api/Emprestimos/{id}` (específico).
+  * **Por que testar assim:** Valida a capacidade de Leitura (Read) e o mapeamento correto do Entity Framework (Join entre Livros, Usuários e Empréstimos). Prova que a API consegue serializar os dados do banco para o formato JSON corretamente e retornar códigos HTTP semânticos (ex: `200 OK` se achar, `404 Not Found` se o ID não existir).
+* **POST (Criação de Empréstimo):**
+  * **O que testar:** Enviar requisições para criar empréstimos válidos e inválidos (ex: alugar um livro com estoque zerado).
+  * **Por que testar assim:** O POST não apenas insere dados, ele processa lógica de negócio. Testá-lo valida a **Atomicidade** da transação: a API só pode registrar o empréstimo se, e somente se, houver sucesso na dedução do estoque do livro. Retornar um erro `400 Bad Request` ao tentar burlar o estoque prova que o sistema é seguro e inviolável.
+* **PUT (Devolução e Atualização):**
+  * **O que testar:** Executar a rota `/api/Emprestimos/{id}/devolver` em empréstimos dentro do prazo e em atraso.
+  * **Por que testar assim:** O PUT, por padrão REST, deve garantir atualizações consistentes. Testar esta rota valida duas lógicas cruciais em uma única requisição: a devolução do livro para a prateleira (soma no estoque) e o cálculo dinâmico da `MultaAtraso` (comparando a data de vencimento com o momento exato do *request* HTTP).
+* **DELETE (Exclusão de Registros):**
+  * **O que testar:** Apagar um registro que esteja com o status "Ativo".
+  * **Por que testar assim:** Testar a exclusão garante que o banco de dados não sofra com lixo relacional. Além disso, valida a regra de compensação: se um administrador deleta um empréstimo ativo por engano, a API deve ser inteligente o suficiente para devolver a unidade daquele livro ao estoque geral antes de destruir o registro, evitando o sumiço de inventário.
+
+---
+
+### 2. Validação da Interface Gráfica (WPF e MVVM)
+O Front-end desktop existe para consumir a API de forma amigável ao usuário final (o bibliotecário). Os testes aqui não focam no banco de dados, mas sim na Experiência do Usuário (UX) e no comportamento da memória.
+
+* **O que testar:** Realizar buscas de atualização da tabela, cliques rápidos repetidos nos botões de Devolução e observação do comportamento da tela.
+* **Por que testar assim:** 
+  1. **Validação do Assincronismo (`async/await`):** Ao clicar em "Atualizar", a tela (UI Thread) não pode congelar enquanto aguarda a resposta da rede. Se a tela continuar clicável, o assincronismo foi bem implementado.
+  2. **Validação do MVVM (Model-View-ViewModel):** Prova que a interface (`.xaml`) está 100% dependente do `ObservableCollection` e da ViewModel. Quando a API responde com os dados atualizados, a tabela reflete instantaneamente os novos valores e multas, comprovando que o *Data Binding* bidirecional está funcionando sem a necessidade de lógicas de tela pesadas (Code-Behind).
+
+---
+
+### 3. Teste de Estresse e Concorrência (Simulador / Console Worker)
+O simulador é um "robô" sem interface gráfica (*headless*), criado para injetar caos controlado e estressar o sistema operacionalmente.
+
+* **O que testar:** Iniciar o Console e deixá-lo rodando de forma ininterrupta, disparando dezenas de `POSTs` e `PUTs` baseados em probabilidades matemáticas, competindo com as ações manuais feitas no painel WPF.
+* **Por que testar assim:** 
+  1. **Prevenção de Race Conditions (Condições de Corrida):** Simula múltiplos totens de biblioteca funcionando ao mesmo tempo. Garante que se duas requisições tentarem alugar a última cópia de um livro no exato mesmo milissegundo, o Entity Framework gerenciará o travamento (*Lock*) do banco de dados, entregando a cópia para a primeira requisição e bloqueando a segunda com um erro de estoque.
+  2. **Resiliência da Rede:** Prova que a classe `HttpClient` foi bem implementada e está reaproveitando conexões corretamente (sem causar *Socket Exhaustion*), mantendo a API de pé e respondendo rapidamente sob volume constante de dados.
+
+### 5. Teste de Regras de Tempo e Lógica Financeira (Cálculo de Multas)
+Como o sistema define automaticamente um prazo de 7 dias para a devolução, todos os novos empréstimos criados estarão no prazo e retornarão multa de `R$ 0,00`. Para validar o algoritmo matemático de cálculo de atraso (R$ 2,00 por dia), é necessário realizar uma "viagem no tempo" manipulando o banco de dados.
+
+**Passo a passo para testar (Time Travel Simulation):**
+1. **Acesso ao Banco:** Abra o arquivo `biblioteca.db` utilizando um gerenciador de banco de dados (como *DB Browser for SQLite*, *SQLiteStudio* ou uma extensão do *VS Code*).
+2. **Manipulação de Estado:** Acesse a tabela `Emprestimos` e localize um registro cujo status seja `"Ativo"`.
+3. **Alteração da Data:** Modifique o valor da coluna `DataVencimento` desse registro para uma data no passado (por exemplo, voltando 10 dias atrás). Salve (Commit) a alteração no banco de dados.
+4. **Execução do Teste:** Volte ao painel **WPF** (clique em Atualizar Dados) ou ao **Swagger**. Execute a devolução (`PUT /api/Emprestimos/{id}/devolver`) deste registro específico.
+5. **Por que testar assim:** O cálculo da multa é dinâmico e ocorre estritamente no momento do `PUT`. Ao forçar uma data de vencimento no passado direto no banco, provamos que a API é a única fonte da verdade. Ela pega a data exata da requisição (`DataDevolucaoReal`), compara com a `DataVencimento` fraudada por nós, e processa perfeitamente a matemática da diferença de dias multiplicada pela taxa de atraso antes de salvar o status final.
+
+---
+
 ## 👨‍💻 Autoria e Créditos
 Projeto acadêmico desenvolvido para a unidade curricular de Desenvolvimento de Sistemas.
 
