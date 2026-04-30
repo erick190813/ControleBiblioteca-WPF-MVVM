@@ -5,7 +5,7 @@
 [![SQLite](https://img.shields.io/badge/SQLite-07405E?logo=sqlite&logoColor=white)](#)
 [![WPF](https://img.shields.io/badge/WPF-MVVM-blue)](#)
 
-Este projeto foi desenvolvido como parte da Situação de Aprendizagem de Integração de Sistemas[cite: 1] do curso Técnico em Desenvolvimento de Sistemas. O objetivo principal é solucionar desafios comuns de comunicação entre sistemas distintos, garantindo consistência de dados e eficiência operacional. 
+Este projeto foi desenvolvido como parte da Situação de Aprendizagem de Integração de Sistemas do curso Técnico em Desenvolvimento de Sistemas. O objetivo principal é solucionar desafios comuns de comunicação entre sistemas distintos, garantindo consistência de dados e eficiência operacional. 
 
 O escopo escolhido para demonstrar essa integração foi **API de Biblioteca → Controle de Empréstimos**.
 
