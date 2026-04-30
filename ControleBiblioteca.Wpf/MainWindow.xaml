@@ -1,0 +1,77 @@
+﻿<Window x:Class="ControleBiblioteca.Wpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:ControleBiblioteca.Wpf.ViewModels"
+        Title="Controle de Biblioteca - Dashboard" Height="600" Width="900"
+        WindowStartupLocation="CenterScreen" Background="#F3F4F6">
+
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="280"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Background="White" CornerRadius="8" Padding="20">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+            </Border.Effect>
+
+            <StackPanel>
+                <TextBlock Text="Novo Empréstimo" FontSize="20" FontWeight="SemiBold" Foreground="#1F2937" Margin="0,0,0,20"/>
+
+                <TextBlock Text="ID do Livro:" Foreground="#4B5563" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding NovoLivroId, UpdateSourceTrigger=PropertyChanged}" Padding="8" Margin="0,0,0,15" BorderBrush="#D1D5DB" BorderThickness="1"/>
+
+                <TextBlock Text="ID do Usuário:" Foreground="#4B5563" Margin="0,0,0,5"/>
+                <TextBox Text="{Binding NovoUsuarioId, UpdateSourceTrigger=PropertyChanged}" Padding="8" Margin="0,0,0,20" BorderBrush="#D1D5DB" BorderThickness="1"/>
+
+                <Button Content="Registrar Empréstimo" Command="{Binding RegistrarEmprestimoCommand}" 
+                        Background="#3B82F6" Foreground="White" Padding="10" BorderThickness="0" Cursor="Hand" Margin="0,0,0,30"/>
+
+                <Separator Margin="0,0,0,30" Background="#E5E7EB"/>
+
+                <TextBlock Text="Ações de Devolução" FontSize="16" FontWeight="SemiBold" Foreground="#1F2937" Margin="0,0,0,15"/>
+                <TextBlock Text="Selecione um item na tabela ao lado para realizar a devolução." TextWrapping="Wrap" Foreground="#6B7280" Margin="0,0,0,15"/>
+
+                <Button Content="Registrar Devolução" Command="{Binding DevolverLivroCommand}" 
+                        Background="#10B981" Foreground="White" Padding="10" BorderThickness="0" Cursor="Hand"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column="1" Background="White" CornerRadius="8" Margin="20,0,0,0" Padding="15">
+            <Border.Effect>
+                <DropShadowEffect Color="Black" Opacity="0.1" BlurRadius="10" ShadowDepth="2"/>
+            </Border.Effect>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,0,0,15">
+                    <TextBlock Text="Dashboard de Empréstimos em Tempo Real" FontSize="20" FontWeight="SemiBold" Foreground="#1F2937" VerticalAlignment="Center"/>
+                    <Button Content="Atualizar Dados" Command="{Binding CarregarDadosCommand}" HorizontalAlignment="Right" 
+                            Background="#F3F4F6" Foreground="#374151" Padding="15,8" BorderBrush="#D1D5DB" BorderThickness="1" Cursor="Hand"/>
+                </Grid>
+
+                <DataGrid Grid.Row="1" ItemsSource="{Binding Emprestimos}" SelectedItem="{Binding EmprestimoSelecionado}"
+                          AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" 
+                          Background="Transparent" BorderThickness="0" RowBackground="White" AlternatingRowBackground="#F9FAFB">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                        <DataGridTextColumn Header="Livro" Binding="{Binding TituloLivro}" Width="*"/>
+                        <DataGridTextColumn Header="Usuário" Binding="{Binding NomeUsuario}" Width="*"/>
+                        <DataGridTextColumn Header="Retirada" Binding="{Binding DataRetirada, StringFormat=\{0:dd/MM/yyyy HH:mm\}}" Width="130"/>
+                        <DataGridTextColumn Header="Status" Binding="{Binding StatusEmprestimo}" Width="100"/>
+                        <DataGridTextColumn Header="Multa" Binding="{Binding MultaAtraso, StringFormat=C}" Width="80"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

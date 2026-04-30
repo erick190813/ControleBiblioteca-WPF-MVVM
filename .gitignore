@@ -1,0 +1,33 @@
+## ----------------------------------------------------------------------
+## Ignore list para Visual Studio / C# / .NET 8 / WPF
+## ----------------------------------------------------------------------
+
+# Pastas de compilação
+bin/
+obj/
+
+# Arquivos de cache e configurações locais do Visual Studio
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+# Banco de dados SQLite (Não devemos versionar o banco de dados de teste)
+*.db
+*.sqlite
+*.db-shm
+*.db-wal
+biblioteca.db
+
+# Arquivos temporários e de log
+*.log
+*.cache
+
+# Pastas de pacotes (Opcional, pois o .NET agora usa cache global, mas é bom garantir)
+packages/
+*.nupkg
+
+# Arquivos do Sistema Operacional (Windows / macOS)
+Thumbs.db
+.DS_Store
